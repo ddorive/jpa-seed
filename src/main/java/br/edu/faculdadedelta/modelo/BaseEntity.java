@@ -5,32 +5,28 @@ import java.io.Serializable;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
-import net.bytebuddy.asm.Advice.Return;
-
 @MappedSuperclass
-public abstract class BaseEntity<T> implements Serializable{
+public abstract class BaseEntity<T> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public abstract T getId();
-	
-	
-	
+
 	@Version
 	private Integer version;
 
 	public Integer getVersion() {
 		return version;
 	}
-	
+
 	/**
-	* verifica se a entidade ja possui um indentificador
-	*
-	*@Return
-	*/
-	
-	public boolean isTransient(){
-		return getId() ==null;
+	 * verifica se a entidade ja possui um indentificador
+	 *
+	 * @Return
+	 */
+
+	public boolean isTransient() {
+		return getId() == null;
 	}
 
 	@Override
@@ -59,5 +55,4 @@ public abstract class BaseEntity<T> implements Serializable{
 		return true;
 	}
 
-	
 }

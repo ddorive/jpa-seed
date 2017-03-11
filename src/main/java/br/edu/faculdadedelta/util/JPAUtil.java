@@ -7,15 +7,15 @@ import javax.persistence.Persistence;
 public enum JPAUtil {
 
 	INSTANCE;
-	
+
 	private EntityManagerFactory factory;
-	
-	private JPAUtil(){
+
+	private JPAUtil() {
 		factory = Persistence.createEntityManagerFactory("DeltaPU");
-				
+
 	}
-	
-	public EntityManager getEntityManager(){
+
+	public EntityManager getEntityManager() {
 		return factory.createEntityManager();
 	}
 }
