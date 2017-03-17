@@ -1,18 +1,21 @@
 package br.edu.faculdadedelta.modelo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import br.edu.faculdadedelta.util.JPAUtil;
 
@@ -88,6 +91,8 @@ public class ProdutoTest {
 
 		assertFalse("entidade agora temID ", produto.isTransient());
 	}
+	
+
 
 	@Before
 	public void instaciarEntityManager() {
@@ -101,7 +106,9 @@ public class ProdutoTest {
 		}
 	}
 	
-public static void deveLimparBase(){
+	
+	@AfterClass
+public static void deveLimparBaseTeste(){
 	EntityManager entityManager = JPAUtil.INSTANCE.getEntityManager();
 	
 	entityManager.getTransaction().begin();
@@ -113,6 +120,6 @@ public static void deveLimparBase(){
 	
 	assertTrue("deve ter excluido registros",  registroExcuidos >0);
 	
-	
 }
+	
 }
