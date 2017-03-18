@@ -1,12 +1,18 @@
 package br.edu.faculdadedelta.modelo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
+import org.hibernate.LazyInitializationException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -77,6 +83,75 @@ public class ClienteTeste {
 	}
 
 	@Test
+	public void deveVerificarExistenciaCliente(){
+		deveSalvarCliente();
+		
+		Query query = em.createQuery("SELECT COUNT(c.id) FROM Cliente c WHERE c.cpf =:cpf");
+		query.setParameter("cpf", CPF_PADRAO);
+		
+		Long qtdResultados = (Long) query.getSingleResult();
+		
+		assertTrue("Verifica se ha registros na lista", qtdResultados >0L);
+	}
+	
+	@Test(expected = NonUniqueResultException.class)
+	public void naoDeveFuncionarSingleResultComMuitosRegistros(){
+		deveSalvarCliente();
+		deveSalvarCliente();
+		
+		Query query = em.createQuery("SELECT c.id FROM Cliente c WHERE c.cpf =:cpf" );
+		
+		query.setParameter("cpf", CPF_PADRAO);
+		query.getSingleResult();
+		
+		fail("Metodo getSingleResultdeve dispara exception NonUniqueResultException");
+		
+	}
+	
+	@Test(expected = NonUniqueResultException.class)
+	public void naoDeveFuncionarSingleResultComNenhumRegistros(){
+		deveSalvarCliente();
+		deveSalvarCliente();
+		
+		Query query = em.createQuery("SELECT c.id FROM Cliente c WHERE c.cpf =:cpf" );
+		
+		query.setParameter("cpf", CPF_PADRAO);
+		query.getSingleResult();
+		
+		fail("Metodo getSingleResultdeve dispara exception NonResultException ");
+		
+	}
+	
+	@Test
+	public void deveAcessarAtributoLazy(){
+		deveSalvarCliente();
+		
+		Cliente cliente = em.find(Cliente.class, 1L);
+		
+		assertNotNull("Verifica se encontrou um registro", cliente);
+		assertNotNull("lista Lazy nao deve ser null", cliente.getCompras() );
+		
+	}
+	
+	@Test(expected = LazyInitializationException.class)
+	public void naoDeveAcessarAtributoLazyForEscopoEntityManager(){
+		deveSalvarCliente();
+		
+		Cliente cliente = em.find(Cliente.class, 1L);
+		
+		assertNotNull("Verifica se encontrou um registro", cliente);
+		
+		em.detach(cliente);
+		
+		cliente.getCompras().size();
+		
+		fail("Deve disparar LazyInitializationException ao acesar"
+		                       + " atributo Lazy de um objeto fora de escopo do EntityManager");
+		
+	}
+	
+	
+	@Test
 	public void deveSalvarCliente() {
 		Cliente cliente = new Cliente();
 		cliente.setNome("Atila Barros");
@@ -94,6 +169,13 @@ public class ClienteTeste {
 	@Before
 	public void instaciarEntityManager() {
 		em = JPAUtil.INSTANCE.getEntityManager();
+	}
+	
+	@After
+	public void fecharEntityManager() {
+		if (em.isOpen()) {
+			em.close();
+		}
 	}
 
 	@AfterClass
