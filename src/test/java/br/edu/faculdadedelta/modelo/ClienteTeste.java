@@ -1,14 +1,11 @@
 package br.edu.faculdadedelta.modelo;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
@@ -45,17 +42,25 @@ public class ClienteTeste {
 	public void deveConsultarClienteComIdNome() {
 		deveSalvarCliente();
 
-		Query query = em.createQuery("SELECT new Cliente(c.id, c.nome) FROM Cliente c WHERE c.cpf = :cpf");
+		Query query = em.createQuery("SELECT new Cliente(c.id, c.nome) FROM Cliente c "
+				                                                      + "WHERE c.cpf = :cpf");
 		query.setParameter("cpf", CPF_PADRAO);
 		List<Cliente> clientes = query.getResultList();
 		assertFalse("verifica se há registro na lista", clientes.isEmpty());
+		
+		
+		//outro metodo para busca
+		clientes.forEach(cliente -> {
+			assertNull("nao deve ter CPF", cliente.getCpf());
+		});
 
-		for (Cliente cliente : clientes) {
-			assertNull("verifica que o cpf deve ser null", cliente.getCpf());
-
-			cliente.setCpf(CPF_PADRAO);
-		}
-
+		/**for (Cliente cliente : clientes) {
+			*assertNull("verifica que o cpf deve ser null", cliente.getCpf());
+*
+			*cliente.setCpf(CPF_PADRAO);
+		*}
+*/
+	
 	}
 
 	@SuppressWarnings("unchecked")
@@ -99,23 +104,27 @@ public class ClienteTeste {
 		deveSalvarCliente();
 		deveSalvarCliente();
 		
-		Query query = em.createQuery("SELECT c.id FROM Cliente c WHERE c.cpf =:cpf" );
+		//Query query = em.createQuery("SELECT c.id FROM Cliente c WHERE c.cpf =:cpf" );
 		
-		query.setParameter("cpf", CPF_PADRAO);
+		Query query = em.createQuery("SELECT c.id FROM Cliente c" );
+		
+		//query.setParameter("cpf", CPF_PADRAO);
+
 		query.getSingleResult();
 		
 		fail("Metodo getSingleResultdeve dispara exception NonUniqueResultException");
 		
 	}
 	
-	@Test(expected = NonUniqueResultException.class)
+	@Test(expected = NoResultException.class)
 	public void naoDeveFuncionarSingleResultComNenhumRegistros(){
 		deveSalvarCliente();
 		deveSalvarCliente();
 		
 		Query query = em.createQuery("SELECT c.id FROM Cliente c WHERE c.cpf =:cpf" );
 		
-		query.setParameter("cpf", CPF_PADRAO);
+		query.setParameter("cpf", "000.111.222-33");
+		
 		query.getSingleResult();
 		
 		fail("Metodo getSingleResultdeve dispara exception NonResultException ");
@@ -142,6 +151,8 @@ public class ClienteTeste {
 		assertNotNull("Verifica se encontrou um registro", cliente);
 		
 		em.detach(cliente);
+		
+		//em.clear(); --> limpa toda istancia
 		
 		cliente.getCompras().size();
 		
